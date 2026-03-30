@@ -8,16 +8,21 @@ export default function AddProduct() {
     const navigate = useNavigate();
 
     const handleSubmit = async () => {
-        const formData = new FormData();
-        Object.keys(form).forEach(key => formData.append(key, form[key]));
-        if (image) {
-            formData.append("image", image);
-        }
+        try {
+            const formData = new FormData();
+            Object.keys(form).forEach(key => formData.append(key, form[key]));
+            if (image) {
+                formData.append("image", image);
+            }
 
-        await API.post("/products", formData, {
-            headers: { "Content-Type": "multipart/form-data" }
-        });
-        navigate("/admin/products");
+            await API.post("/products", formData, {
+                headers: { "Content-Type": "multipart/form-data" }
+            });
+            navigate("/admin/products");
+        } catch (error) {
+            alert(error.response?.data?.message || "An error occurred while saving the product");
+            console.error(error);
+        }
     };
 
     const inputStyle = {
