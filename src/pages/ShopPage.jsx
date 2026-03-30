@@ -3,67 +3,91 @@ import { useSearchParams } from "react-router-dom";
 import API from "../services/api";
 import FilterSidebar from "../components/FilterSidebar";
 import ProductList from "../components/ProductList";
+import { useLoading } from "../context/LoadingContext";
+import "../responsive.css";
 
 export default function ShopPage() {
-    const [products, setProducts] = useState([]);
+    const [products, setProducts]       = useState([]);
+    const [drawerOpen, setDrawerOpen]   = useState(false);
     const [params] = useSearchParams();
+    const { startLoading, stopLoading } = useLoading();
 
     const category = params.get("category");
 
     useEffect(() => {
-        API.get(`/products${category ? `?category=${category}` : ""}`)
-            .then(res => setProducts(res.data.products || []))
-            .catch(err => {
+        const fetchProducts = async () => {
+            startLoading();
+            try {
+                const res = await API.get(`/products${category ? `?category=${category}` : ""}`);
+                setProducts(res.data.products || []);
+            } catch (err) {
                 console.error(err);
                 setProducts([]);
-            });
+            } finally {
+                stopLoading();
+            }
+        };
+        fetchProducts();
     }, [category]);
 
     return (
-        <div style={{ backgroundColor: "#f9fafb", minHeight: "100vh", fontFamily: "'Inter', sans-serif" }}>
-            {/* Header */}
-            <header style={{
-                backgroundColor: "white",
-                padding: "20px 40px",
-                boxShadow: "0 1px 3px rgba(0,0,0,0.05)",
-                display: "flex",
-                justifyContent: "space-between",
-                alignItems: "center",
-                position: "sticky",
-                top: 0,
-                zIndex: 100
-            }}>
-                <h1 style={{ margin: 0, fontSize: "26px", color: "#111827", fontWeight: "900", letterSpacing: "-0.5px" }}>
-                    <span style={{ color: "#10b981" }}>Ramesh Karayana Store</span>
+        <div style={{ backgroundColor: "#f9fafb", minHeight: "100vh", fontFamily: "'Inter', 'Segoe UI', sans-serif" }}>
+            {/* ── Header ── */}
+            <header className="shop-header">
+                <h1 className="shop-header__logo">
+                    <span>Ramesh</span> Karayana
                 </h1>
-                <div style={{ display: "flex", alignItems: "center", gap: "20px" }}>
-                    <span style={{ fontSize: "16px", color: "#4b5563", fontWeight: "600", cursor: "pointer" }}>My Account</span>
-                    <div style={{
-                        width: "42px", height: "42px", borderRadius: "50%", backgroundColor: "#e5e7eb",
-                        display: "flex", alignItems: "center", justifyContent: "center", fontWeight: "700", color: "#6b7280",
-                        boxShadow: "inset 0 2px 4px rgba(0,0,0,0.05)"
-                    }}>
-                        R
-                    </div>
+                <div className="shop-header__right">
+                    {/* Mobile filter toggle */}
+                    <button
+                        className="shop-header__filter-toggle"
+                        onClick={() => setDrawerOpen(true)}
+                    >
+                        🎯 Filters
+                    </button>
+                    <span className="shop-header__account">My Account</span>
+                    <div className="shop-header__avatar">R</div>
                 </div>
             </header>
 
-            {/* Main Content */}
-            <div style={{ display: "flex", maxWidth: "1500px", margin: "0 auto", padding: "40px", gap: "50px" }}>
-                <div style={{ flex: "0 0 260px" }}>
+            {/* ── Mobile Sidebar Overlay + Drawer ── */}
+            {drawerOpen && (
+                <div
+                    className="sidebar-overlay"
+                    style={{ display: "block" }}
+                    onClick={() => setDrawerOpen(false)}
+                />
+            )}
+            <div className={`sidebar-drawer${drawerOpen ? " sidebar-drawer--open" : ""}`}>
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "16px" }}>
+                    <span style={{ fontWeight: "800", fontSize: "16px", color: "#111827" }}>Categories</span>
+                    <button
+                        onClick={() => setDrawerOpen(false)}
+                        style={{ background: "none", border: "none", fontSize: "18px", cursor: "pointer", color: "#6b7280" }}
+                    >
+                        ✕
+                    </button>
+                </div>
+                <FilterSidebar currentCategory={category} onSelect={() => setDrawerOpen(false)} />
+            </div>
+
+            {/* ── Main Layout ── */}
+            <div className="shop-layout">
+                {/* Desktop Sidebar */}
+                <aside className="shop-sidebar">
                     <FilterSidebar currentCategory={category} />
-                </div>
-                <div style={{ flex: 1 }}>
-                    <div style={{ marginBottom: "30px" }}>
-                        <h2 style={{ margin: 0, fontSize: "32px", color: "#111827", fontWeight: "800" }}>
-                            {category ? category : "All Groceries"}
-                        </h2>
-                        <p style={{ margin: "8px 0 0", color: "#6b7280", fontSize: "16px", fontWeight: "500" }}>
-                            Showing {products.length} {products.length === 1 ? 'result' : 'results'} ready to buy
-                        </p>
-                    </div>
+                </aside>
+
+                {/* Products */}
+                <main className="shop-main">
+                    <h2 className="shop-main__heading">
+                        {category ? category : "All Groceries"}
+                    </h2>
+                    <p className="shop-main__count">
+                        Showing {products.length} {products.length === 1 ? "result" : "results"} ready to buy
+                    </p>
                     <ProductList products={products} />
-                </div>
+                </main>
             </div>
         </div>
     );
