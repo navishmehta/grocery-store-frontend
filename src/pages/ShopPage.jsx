@@ -7,19 +7,44 @@ import { useLoading } from "../context/LoadingContext";
 import "../responsive.css";
 
 export default function ShopPage() {
-    const [products, setProducts]       = useState([]);
-    const [drawerOpen, setDrawerOpen]   = useState(false);
-    const [params] = useSearchParams();
+    const [products, setProducts]     = useState([]);
+    const [categories, setCategories] = useState([]);
+    const [drawerOpen, setDrawerOpen] = useState(false);
+    const [params, setParams]         = useSearchParams();
     const { startLoading, stopLoading } = useLoading();
 
-    const category = params.get("category");
+    const category = params.get("category") || null;
 
+    /* ── Fetch all categories once (for sidebar) ── */
+    useEffect(() => {
+        const loadCategories = async () => {
+            try {
+                const res = await API.get("/products/categories");
+                setCategories(res.data.categories || []);
+            } catch {
+                /* if endpoint doesn't exist, derive categories from products */
+            }
+        };
+        loadCategories();
+    }, []);
+
+    /* ── Fetch products whenever category changes ── */
     useEffect(() => {
         const fetchProducts = async () => {
             startLoading();
             try {
-                const res = await API.get(`/products${category ? `?category=${category}` : ""}`);
-                setProducts(res.data.products || []);
+                const url = category
+                    ? `/products?category=${encodeURIComponent(category)}`
+                    : "/products";
+                const res = await API.get(url);
+                const data = res.data.products || [];
+                setProducts(data);
+
+                /* derive categories from product data as fallback */
+                if (categories.length === 0) {
+                    const unique = [...new Set(data.map(p => p.category).filter(Boolean))];
+                    setCategories(unique);
+                }
             } catch (err) {
                 console.error(err);
                 setProducts([]);
@@ -30,15 +55,41 @@ export default function ShopPage() {
         fetchProducts();
     }, [category]);
 
+    const selectCategory = (cat) => {
+        if (cat === "All" || !cat) {
+            setParams({});
+        } else {
+            setParams({ category: cat });
+        }
+        setDrawerOpen(false);
+    };
+
     return (
         <div style={{ backgroundColor: "#f9fafb", minHeight: "100vh", fontFamily: "'Inter', 'Segoe UI', sans-serif" }}>
-            {/* ── Header ── */}
+            {/* ── Info Bar ── */}
+            <div style={{
+                backgroundColor: "#10b981",
+                padding: "7px clamp(12px, 4vw, 40px)",
+                display: "flex",
+                justifyContent: "space-between",
+                alignItems: "center",
+                flexWrap: "wrap",
+                gap: "4px",
+            }}>
+                <span style={{ color: "white", fontSize: "clamp(11px, 1.2vw, 13px)", fontWeight: "600", display: "flex", alignItems: "center", gap: "6px" }}>
+                    📍 Noordi Bazar, Near Dr. Lauka, Tarn Taran
+                </span>
+                <a href="tel:9815262920" style={{ color: "white", fontSize: "clamp(11px, 1.2vw, 13px)", fontWeight: "700", textDecoration: "none", display: "flex", alignItems: "center", gap: "6px" }}>
+                    📞 98152 62920
+                </a>
+            </div>
+
+            {/* ── Main Header ── */}
             <header className="shop-header">
                 <h1 className="shop-header__logo">
-                    <span>Ramesh</span> Karayana
+                    <span>Ramesh</span> Karayana <span>Store</span>
                 </h1>
                 <div className="shop-header__right">
-                    {/* Mobile filter toggle */}
                     <button
                         className="shop-header__filter-toggle"
                         onClick={() => setDrawerOpen(true)}
@@ -50,7 +101,7 @@ export default function ShopPage() {
                 </div>
             </header>
 
-            {/* ── Mobile Sidebar Overlay + Drawer ── */}
+            {/* ── Mobile Overlay ── */}
             {drawerOpen && (
                 <div
                     className="sidebar-overlay"
@@ -58,24 +109,34 @@ export default function ShopPage() {
                     onClick={() => setDrawerOpen(false)}
                 />
             )}
+
+            {/* ── Mobile Drawer ── */}
             <div className={`sidebar-drawer${drawerOpen ? " sidebar-drawer--open" : ""}`}>
-                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "16px" }}>
-                    <span style={{ fontWeight: "800", fontSize: "16px", color: "#111827" }}>Categories</span>
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "20px" }}>
+                    <span style={{ fontWeight: "800", fontSize: "17px", color: "#111827" }}>Categories</span>
                     <button
                         onClick={() => setDrawerOpen(false)}
-                        style={{ background: "none", border: "none", fontSize: "18px", cursor: "pointer", color: "#6b7280" }}
+                        style={{ background: "none", border: "none", fontSize: "20px", cursor: "pointer", color: "#6b7280", lineHeight: 1 }}
                     >
                         ✕
                     </button>
                 </div>
-                <FilterSidebar currentCategory={category} onSelect={() => setDrawerOpen(false)} />
+                <FilterSidebar
+                    categories={categories}
+                    currentCategory={category}
+                    onSelect={selectCategory}
+                />
             </div>
 
             {/* ── Main Layout ── */}
             <div className="shop-layout">
                 {/* Desktop Sidebar */}
                 <aside className="shop-sidebar">
-                    <FilterSidebar currentCategory={category} />
+                    <FilterSidebar
+                        categories={categories}
+                        currentCategory={category}
+                        onSelect={selectCategory}
+                    />
                 </aside>
 
                 {/* Products */}

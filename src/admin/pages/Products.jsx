@@ -55,6 +55,27 @@ function StatsBar({ products }) {
     );
 }
 
+/* ─── Confirm Modal ─────────────────────────────────── */
+function ConfirmModal({ product, onConfirm, onCancel }) {
+    return (
+        <div className="modal-overlay" onClick={onCancel}>
+            <div className="modal-box" onClick={e => e.stopPropagation()}>
+                <div className="modal-box__danger-ring">🗑️</div>
+                <h3 className="modal-box__title">Delete Product?</h3>
+                <p className="modal-box__body">
+                    You're about to permanently delete{" "}
+                    <span className="modal-box__product-name">{product.name}</span>.<br />
+                    This action cannot be undone.
+                </p>
+                <div className="modal-box__actions">
+                    <button className="modal-btn-cancel" onClick={onCancel}>Cancel</button>
+                    <button className="modal-btn-delete" onClick={onConfirm}>Yes, Delete</button>
+                </div>
+            </div>
+        </div>
+    );
+}
+
 /* ─── ProductCard ────────────────────────────────────── */
 function ProductCard({ p, onEdit, onDelete }) {
     const catStyle = getCategoryStyle(p.category);
@@ -105,7 +126,7 @@ function ProductCard({ p, onEdit, onDelete }) {
                     <button className="btn-edit" onClick={() => onEdit(p._id)}>
                         ✏️ Edit
                     </button>
-                    <button className="btn-delete" onClick={() => onDelete(p._id)}>
+                    <button className="btn-delete" onClick={() => onDelete(p)}>
                         🗑 Delete
                     </button>
                 </div>
@@ -116,9 +137,10 @@ function ProductCard({ p, onEdit, onDelete }) {
 
 /* ─── Main Page ──────────────────────────────────────── */
 export default function Products() {
-    const [products, setProducts]   = useState([]);
-    const [search, setSearch]       = useState("");
-    const [filterCat, setFilterCat] = useState("All");
+    const [products, setProducts]       = useState([]);
+    const [search, setSearch]           = useState("");
+    const [filterCat, setFilterCat]     = useState("All");
+    const [pendingDelete, setPendingDelete] = useState(null); // product object | null
     const navigate = useNavigate();
     const { startLoading, stopLoading } = useLoading();
 
@@ -137,9 +159,10 @@ export default function Products() {
 
     useEffect(() => { fetchProducts(); }, []);
 
-    const deleteProduct = async (id) => {
-        if (!window.confirm("Are you sure you want to delete this product?")) return;
-        startLoading();
+    const confirmDelete = async () => {
+        if (!pendingDelete) return;
+        const id = pendingDelete._id;
+        setPendingDelete(null);
         try {
             await API.delete(`/products/${id}`);
             await fetchProducts();
@@ -225,12 +248,21 @@ export default function Products() {
                                 key={p._id}
                                 p={p}
                                 onEdit={id => navigate(`/admin/edit-product/${id}`)}
-                                onDelete={deleteProduct}
+                                onDelete={setPendingDelete}
                             />
                         ))}
                     </div>
                 )}
             </div>
+
+            {/* Confirm Delete Modal */}
+            {pendingDelete && (
+                <ConfirmModal
+                    product={pendingDelete}
+                    onConfirm={confirmDelete}
+                    onCancel={() => setPendingDelete(null)}
+                />
+            )}
         </div>
     );
 }

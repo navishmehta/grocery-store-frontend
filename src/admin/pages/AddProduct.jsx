@@ -44,6 +44,7 @@ export default function AddProduct() {
             await API.post("/products", formData, {
                 headers: { "Content-Type": "multipart/form-data" },
             });
+            stopLoading();
             navigate("/admin/products");
         } catch (error) {
             alert(error.response?.data?.message || "An error occurred while saving the product");

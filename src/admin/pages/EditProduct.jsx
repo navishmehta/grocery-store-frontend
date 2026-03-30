@@ -61,6 +61,7 @@ export default function EditProduct() {
             await API.put(`/products/${id}`, formData, {
                 headers: { "Content-Type": "multipart/form-data" },
             });
+            stopLoading();
             navigate("/admin/products");
         } catch (error) {
             alert(error.response?.data?.message || "An error occurred while updating the product");

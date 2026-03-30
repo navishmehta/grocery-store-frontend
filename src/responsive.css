@@ -760,6 +760,107 @@
 }
 .sidebar-drawer--open { transform: translateX(0); }
 
+/* ──────────────────────────────────────────────
+   13. CONFIRM DELETE MODAL
+   ────────────────────────────────────────────── */
+@keyframes modal-in {
+  from { opacity: 0; transform: scale(0.92) translateY(16px); }
+  to   { opacity: 1; transform: scale(1)   translateY(0);     }
+}
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 500;
+  background: rgba(15, 15, 30, 0.55);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+}
+.modal-box {
+  background: white;
+  border-radius: 24px;
+  padding: 36px 32px 28px;
+  width: 100%;
+  max-width: 420px;
+  box-shadow: 0 24px 60px rgba(0,0,0,0.2);
+  animation: modal-in 0.25s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+  text-align: center;
+}
+.modal-box__danger-ring {
+  width: 72px;
+  height: 72px;
+  border-radius: 50%;
+  background: #fee2e2;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 20px;
+  font-size: 34px;
+}
+.modal-box__title {
+  font-size: 20px;
+  font-weight: 800;
+  color: #111827;
+  margin: 0 0 10px;
+}
+.modal-box__body {
+  font-size: 14px;
+  color: #6b7280;
+  line-height: 1.6;
+  margin: 0 0 28px;
+}
+.modal-box__product-name {
+  display: inline-block;
+  font-weight: 700;
+  color: #374151;
+  background: #f3f4f6;
+  padding: 2px 10px;
+  border-radius: 6px;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.modal-box__actions {
+  display: flex;
+  gap: 12px;
+}
+.modal-btn-cancel {
+  flex: 1;
+  padding: 12px;
+  border: 1.5px solid #e5e7eb;
+  background: white;
+  color: #374151;
+  border-radius: 12px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  font-family: inherit;
+  transition: background 0.2s;
+}
+.modal-btn-cancel:hover { background: #f9fafb; }
+.modal-btn-delete {
+  flex: 1;
+  padding: 12px;
+  border: none;
+  background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+  color: white;
+  border-radius: 12px;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  font-family: inherit;
+  box-shadow: 0 4px 12px rgba(220, 38, 38, 0.35);
+  transition: all 0.2s;
+}
+.modal-btn-delete:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 18px rgba(220, 38, 38, 0.45);
+}
+
 /* ================================================================
    RESPONSIVE BREAKPOINTS
    ================================================================ */
