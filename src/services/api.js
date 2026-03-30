@@ -1,7 +1,7 @@
 import axios from "axios";
 
 const API = axios.create({
-    baseURL: "http://localhost:5001/api"
+    baseURL: "https://grocery-store-backend-dc6p.onrender.com/"
 });
 
 export default API;
