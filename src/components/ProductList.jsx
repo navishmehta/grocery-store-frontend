@@ -80,12 +80,7 @@ function ShopCard({ p }) {
                         )}
                     </div>
 
-                    <button
-                        className="shop-card__add-btn"
-                        disabled={p.isOutOfStock}
-                    >
-                        {p.isOutOfStock ? "🚫" : "Add +"}
-                    </button>
+
                 </div>
             </div>
         </div>
