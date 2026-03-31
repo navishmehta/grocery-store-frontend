@@ -36,14 +36,14 @@ export default function EditProduct() {
                 const res = await API.get(`/products/${id}`);
                 const p = res.data.product; // Backend returns { success: true, product: {...} }
 
-                // Map nested object data to flat form state
+                // Map flat properties from backend
                 setForm({
-                    nameEn: p.name?.en || "",
-                    namePa: p.name?.pa || "",
+                    nameEn: p.nameEn || "",
+                    namePa: p.namePa || "",
                     price: p.price || "",
                     stock: p.stock || 0,
-                    qtyValue: p.quantity?.value || "",
-                    qtyUnit: p.quantity?.unit || "",
+                    qtyValue: p.qtyValue || "",
+                    qtyUnit: p.qtyUnit || "",
                     category: p.category || ""
                 });
 
@@ -63,13 +63,13 @@ export default function EditProduct() {
         try {
             const formData = new FormData();
 
-            // Reconstruct the nested objects for the backend
-            formData.append("name[en]", form.nameEn);
-            formData.append("name[pa]", form.namePa);
+            // Map flat property names for backend consistency
+            formData.append("nameEn", form.nameEn);
+            formData.append("namePa", form.namePa);
+            formData.append("qtyValue", form.qtyValue);
+            formData.append("qtyUnit", form.qtyUnit);
             formData.append("price", form.price);
             formData.append("stock", form.stock);
-            formData.append("quantity[value]", form.qtyValue);
-            formData.append("quantity[unit]", form.qtyUnit);
             formData.append("category", form.category);
 
             if (image) formData.append("image", image);

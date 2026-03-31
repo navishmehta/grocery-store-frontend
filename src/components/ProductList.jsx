@@ -28,7 +28,7 @@ function ShopCard({ p }) {
                 {p.image ? (
                     <img
                         src={p.image}
-                        alt={p.name?.en || "Product"}
+                        alt={p.nameEn || "Product"}
                         className="shop-card__img"
                         onError={(e) => {
                             e.target.onerror = null;
@@ -63,12 +63,12 @@ function ShopCard({ p }) {
             {/* Body Section */}
             <div className="product-card__body">
                 {/* Dual Language Names */}
-                <h2 className="shop-card__pa-name">{p.name?.pa || ""}</h2>
-                <p className="shop-card__name">{p.name?.en || "Untitled"}</p>
+                <h2 className="shop-card__pa-name">{p.namePa || ""}</h2>
+                <p className="shop-card__name">{p.nameEn || "Untitled"}</p>
 
                 {/* Quantity Object */}
                 <p className="shop-card__qty">
-                    {p.quantity ? `${p.quantity.value} ${p.quantity.unit}` : "1 item"}
+                    {p.qtyValue ? `${p.qtyValue} ${p.qtyUnit}` : "1 item"}
                 </p>
 
                 <div className="shop-card__footer">

@@ -59,11 +59,11 @@ export default function AddProduct() {
         try {
             const formData = new FormData();
 
-            // Correct way to append nested objects for Multer/Express
-            formData.append("name[en]", form.name.en);
-            formData.append("name[pa]", form.name.pa);
-            formData.append("quantity[value]", form.quantity.value);
-            formData.append("quantity[unit]", form.quantity.unit);
+            // Map flat property names for backend consistency
+            formData.append("nameEn", form.name.en);
+            formData.append("namePa", form.name.pa);
+            formData.append("qtyValue", form.quantity.value);
+            formData.append("qtyUnit", form.quantity.unit);
 
             formData.append("price", form.price);
             formData.append("category", form.category);
