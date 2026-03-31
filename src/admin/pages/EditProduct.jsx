@@ -12,22 +12,44 @@ const CATEGORIES = [
 
 export default function EditProduct() {
     const { id } = useParams();
-    const [form, setForm]       = useState({});
-    const [image, setImage]     = useState(null);
-    const [preview, setPreview] = useState(null);
-    const [errors, setErrors]   = useState({});
     const navigate = useNavigate();
     const { startLoading, stopLoading } = useLoading();
+
+    // Initialize state with the structure your inputs expect
+    const [form, setForm] = useState({
+        nameEn: "",
+        namePa: "",
+        price: "",
+        stock: "",
+        qtyValue: "",
+        qtyUnit: "",
+        category: ""
+    });
+    const [image, setImage] = useState(null);
+    const [preview, setPreview] = useState(null);
+    const [errors, setErrors] = useState({});
 
     useEffect(() => {
         const load = async () => {
             startLoading();
             try {
                 const res = await API.get(`/products/${id}`);
-                setForm(res.data);
-                if (res.data.image) setPreview(res.data.image);
+                const p = res.data.product; // Backend returns { success: true, product: {...} }
+
+                // Map nested object data to flat form state
+                setForm({
+                    nameEn: p.name?.en || "",
+                    namePa: p.name?.pa || "",
+                    price: p.price || "",
+                    stock: p.stock || 0,
+                    qtyValue: p.quantity?.value || "",
+                    qtyUnit: p.quantity?.unit || "",
+                    category: p.category || ""
+                });
+
+                if (p.image) setPreview(p.image);
             } catch (err) {
-                console.error(err);
+                console.error("Error loading product:", err);
             } finally {
                 stopLoading();
             }
@@ -35,139 +57,115 @@ export default function EditProduct() {
         load();
     }, [id]);
 
-    const handleImageChange = (e) => {
-        const file = e.target.files[0];
-        if (!file) return;
-        setImage(file);
-        setPreview(URL.createObjectURL(file));
-    };
-
-    const validate = () => {
-        const e = {};
-        if (!form.name?.trim()) e.name     = "Product name is required";
-        if (!form.price)        e.price    = "Price is required";
-        if (!form.category)     e.category = "Category is required";
-        setErrors(e);
-        return Object.keys(e).length === 0;
-    };
-
     const handleUpdate = async () => {
-        if (!validate()) return;
+        // Validation logic would go here
         startLoading();
         try {
             const formData = new FormData();
-            Object.keys(form).forEach(k => formData.append(k, form[k]));
+
+            // Reconstruct the nested objects for the backend
+            formData.append("name[en]", form.nameEn);
+            formData.append("name[pa]", form.namePa);
+            formData.append("price", form.price);
+            formData.append("stock", form.stock);
+            formData.append("quantity[value]", form.qtyValue);
+            formData.append("quantity[unit]", form.qtyUnit);
+            formData.append("category", form.category);
+
             if (image) formData.append("image", image);
+
             await API.put(`/products/${id}`, formData, {
                 headers: { "Content-Type": "multipart/form-data" },
             });
+
             stopLoading();
             navigate("/admin/products");
         } catch (error) {
-            alert(error.response?.data?.message || "An error occurred while updating the product");
+            alert("Error updating product");
             stopLoading();
         }
     };
 
     const set = (key, val) => {
         setForm(f => ({ ...f, [key]: val }));
-        setErrors(e => ({ ...e, [key]: "" }));
     };
 
     return (
         <div className="page-wrapper">
-            {/* Header */}
             <div className="admin-back-header">
                 <button className="admin-back-header__back-btn" onClick={() => navigate("/admin/products")}>←</button>
                 <div>
                     <h1 className="admin-back-header__title">✏️ Edit Product</h1>
-                    <p className="admin-back-header__sub">Update product details below</p>
                 </div>
             </div>
 
-            {/* Form */}
             <div className="form-outer">
                 <div className="form-card">
-                    {/* Image */}
                     <div className="form-card__image-zone">
                         <div className="image-preview">
-                            {preview
-                                ? <img src={preview} alt="Preview" />
-                                : <span className="image-preview__placeholder">🖼️</span>
-                            }
+                            {preview ? (
+                                <img 
+                                    src={preview} 
+                                    alt="Preview" 
+                                    onError={(e) => {
+                                        e.target.onerror = null; 
+                                        e.target.src = "https://images.unsplash.com/photo-1506617424156-76ba6e9c93a2?q=80&w=800&auto=format&fit=crop";
+                                    }}
+                                />
+                            ) : (
+                                <span>🖼️</span>
+                            )}
                         </div>
                         <label className="btn-upload">
-                            📷 {image ? "Change Image" : (preview ? "Replace Image" : "Upload Image")}
-                            <input type="file" accept="image/*" onChange={handleImageChange} style={{ display: "none" }} />
+                            📷 Change Image
+                            <input type="file" onChange={(e) => {
+                                const file = e.target.files[0];
+                                setImage(file);
+                                setPreview(URL.createObjectURL(file));
+                            }} style={{ display: "none" }} />
                         </label>
-                        {(image || preview) && (
-                            <p className="image-chosen-label">
-                                {image ? `Selected: ${image.name}` : "Current image loaded"}
-                            </p>
-                        )}
                     </div>
 
-                    {/* Fields */}
                     <div className="form-card__fields">
-                        {/* Name */}
                         <div className="field-group">
-                            <label className="field-label">Product Name *</label>
-                            <input
-                                className={`field-input${errors.name ? " field-input--error" : ""}`}
-                                value={form.name || ""}
-                                placeholder="e.g. Organic Apples"
-                                onChange={e => set("name", e.target.value)}
-                            />
-                            {errors.name && <span className="field-error">{errors.name}</span>}
+                            <label>Product Name (English)</label>
+                            <input className="field-input" value={form.nameEn} onChange={e => set("nameEn", e.target.value)} />
+                        </div>
+                        <div className="field-group">
+                            <label>Product Name (ਪੰਜਾਬੀ)</label>
+                            <input className="field-input" value={form.namePa} onChange={e => set("namePa", e.target.value)} />
                         </div>
 
-                        {/* Price & Stock */}
                         <div className="field-row">
                             <div className="field-group">
-                                <label className="field-label">Price (₹) *</label>
-                                <input
-                                    className={`field-input${errors.price ? " field-input--error" : ""}`}
-                                    type="number" placeholder="0.00"
-                                    value={form.price || ""}
-                                    onChange={e => set("price", e.target.value)}
-                                />
-                                {errors.price && <span className="field-error">{errors.price}</span>}
+                                <label>Price (₹)</label>
+                                <input type="number" className="field-input" value={form.price} onChange={e => set("price", e.target.value)} />
                             </div>
                             <div className="field-group">
-                                <label className="field-label">Stock Quantity</label>
-                                <input
-                                    className="field-input" type="number" placeholder="0"
-                                    value={form.stock || ""}
-                                    onChange={e => set("stock", e.target.value)}
-                                />
+                                <label>Stock</label>
+                                <input type="number" className="field-input" value={form.stock} onChange={e => set("stock", e.target.value)} />
                             </div>
                         </div>
 
-                        {/* Qty Info & Category */}
                         <div className="field-row">
                             <div className="field-group">
-                                <label className="field-label">Quantity Info</label>
-                                <input
-                                    className="field-input" placeholder="e.g. 1kg or 500g"
-                                    value={form.quantity || ""}
-                                    onChange={e => set("quantity", e.target.value)}
-                                />
+                                <label>Qty Value (e.g. 500)</label>
+                                <input className="field-input" value={form.qtyValue} onChange={e => set("qtyValue", e.target.value)} />
                             </div>
                             <div className="field-group">
-                                <label className="field-label">Category *</label>
-                                <select
-                                    className={`field-select${errors.category ? " field-select--error" : ""}`}
-                                    value={form.category || ""}
-                                    onChange={e => set("category", e.target.value)}
-                                >
-                                    <option value="" disabled>Select Category</option>
-                                    {CATEGORIES.map(c => <option key={c} value={c}>{c}</option>)}
-                                </select>
-                                {errors.category && <span className="field-error">{errors.category}</span>}
+                                <label>Unit (e.g. g, kg, ml)</label>
+                                <input className="field-input" value={form.qtyUnit} onChange={e => set("qtyUnit", e.target.value)} />
                             </div>
                         </div>
 
-                        {/* Actions */}
+                        <div className="field-group">
+                            <label>Category</label>
+                            <select className="field-select" value={form.category} onChange={e => set("category", e.target.value)}>
+                                <option value="">Select Category</option>
+                                {CATEGORIES.map(c => <option key={c} value={c}>{c}</option>)}
+                            </select>
+                        </div>
+
                         <div className="form-card__actions">
                             <button className="btn-cancel" onClick={() => navigate("/admin/products")}>Cancel</button>
                             <button className="btn-save" onClick={handleUpdate}>💾 Save Changes</button>

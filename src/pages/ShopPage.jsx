@@ -7,28 +7,25 @@ import { useLoading } from "../context/LoadingContext";
 import "../responsive.css";
 
 export default function ShopPage() {
-    const [products, setProducts]     = useState([]);
+    const [products, setProducts] = useState([]);
     const [categories, setCategories] = useState([]);
     const [drawerOpen, setDrawerOpen] = useState(false);
-    const [params, setParams]         = useSearchParams();
+    const [params, setParams] = useSearchParams();
     const { startLoading, stopLoading } = useLoading();
 
     const category = params.get("category") || null;
 
-    /* ── Fetch all categories once (for sidebar) ── */
     useEffect(() => {
         const loadCategories = async () => {
             try {
                 const res = await API.get("/products/categories");
                 setCategories(res.data.categories || []);
             } catch {
-                /* if endpoint doesn't exist, derive categories from products */
             }
         };
         loadCategories();
     }, []);
 
-    /* ── Fetch products whenever category changes ── */
     useEffect(() => {
         const fetchProducts = async () => {
             startLoading();
@@ -40,7 +37,6 @@ export default function ShopPage() {
                 const data = res.data.products || [];
                 setProducts(data);
 
-                /* derive categories from product data as fallback */
                 if (categories.length === 0) {
                     const unique = [...new Set(data.map(p => p.category).filter(Boolean))];
                     setCategories(unique);

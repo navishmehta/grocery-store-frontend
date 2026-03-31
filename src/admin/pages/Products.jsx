@@ -6,45 +6,43 @@ import "../../responsive.css";
 
 /* ─── Helpers ───────────────────────────────────────── */
 const CATEGORY_COLORS = {
-    "Fruits & Vegetables":    { bg: "#dcfce7", text: "#16a34a" },
-    "Dairy & Bakery":         { bg: "#fef9c3", text: "#ca8a04" },
-    "Staples":                { bg: "#fce7f3", text: "#db2777" },
+    "Fruits & Vegetables": { bg: "#dcfce7", text: "#16a34a" },
+    "Dairy & Bakery": { bg: "#fef9c3", text: "#ca8a04" },
+    "Staples": { bg: "#fce7f3", text: "#db2777" },
     "Snacks & Branded Foods": { bg: "#ffedd5", text: "#ea580c" },
-    "Beverages":              { bg: "#dbeafe", text: "#2563eb" },
-    "Personal Care":          { bg: "#ede9fe", text: "#7c3aed" },
-    "Home Care":              { bg: "#e0f2fe", text: "#0284c7" },
-    "Meat & Seafood":         { bg: "#fee2e2", text: "#dc2626" },
+    "Beverages": { bg: "#dbeafe", text: "#2563eb" },
+    "Personal Care": { bg: "#ede9fe", text: "#7c3aed" },
+    "Home Care": { bg: "#e0f2fe", text: "#0284c7" },
+    "Meat & Seafood": { bg: "#fee2e2", text: "#dc2626" },
 };
 const getCategoryStyle = (cat) => CATEGORY_COLORS[cat] || { bg: "#f3f4f6", text: "#374151" };
 
-const stockStatus = (stock) => {
-    if (stock === undefined) return null;
-    if (stock === 0)   return { label: "Out of stock", bg: "#fee2e2", color: "#dc2626" };
-    if (stock <= 10)   return { label: `${stock} left`,    bg: "#fff7ed", color: "#ea580c" };
-    return                    { label: `${stock} in stock`, bg: "#f0fdf4", color: "#16a34a" };
+// Updated for Boolean Stock Status
+const getStockBadge = (isOutOfStock) => {
+    if (isOutOfStock) return { label: "Out of Stock", bg: "#fee2e2", color: "#dc2626" };
+    return { label: "In Stock", bg: "#f0fdf4", color: "#16a34a" };
 };
 
 /* ─── StatsBar ───────────────────────────────────────── */
 function StatsBar({ products }) {
-    const total      = products.length;
-    const outStock   = products.filter(p => p.stock === 0).length;
-    const lowStock   = products.filter(p => p.stock > 0 && p.stock <= 10).length;
+    const total = products.length;
+    // Filter by Boolean instead of 0
+    const outStock = products.filter(p => p.isOutOfStock).length;
+    const discounted = products.filter(p => p.hasDiscount).length;
     const categories = new Set(products.map(p => p.category).filter(Boolean)).size;
 
     const stats = [
-        { label: "Total Products", value: total,      icon: "📦", color: "#4f46e5", bg: "#f5f3ff" },
-        { label: "Categories",     value: categories,  icon: "🏷️",  color: "#0284c7", bg: "#e0f2fe" },
-        { label: "Low Stock",      value: lowStock,    icon: "⚠️",  color: "#ea580c", bg: "#fff7ed" },
-        { label: "Out of Stock",   value: outStock,    icon: "🚫", color: "#dc2626", bg: "#fee2e2" },
+        { label: "Total Items", value: total, icon: "📦", color: "#4f46e5", bg: "#f5f3ff" },
+        { label: "Categories", value: categories, icon: "🏷️", color: "#0284c7", bg: "#e0f2fe" },
+        { label: "On Sale", value: discounted, icon: "🏷️", color: "#ea580c", bg: "#fff7ed" },
+        { label: "Out of Stock", value: outStock, icon: "🚫", color: "#dc2626", bg: "#fee2e2" },
     ];
 
     return (
         <div className="stats-grid">
             {stats.map(s => (
                 <div key={s.label} className="stat-card">
-                    <div className="stat-card__icon" style={{ backgroundColor: s.bg }}>
-                        {s.icon}
-                    </div>
+                    <div className="stat-card__icon" style={{ backgroundColor: s.bg }}>{s.icon}</div>
                     <div>
                         <div className="stat-card__value">{s.value}</div>
                         <div className="stat-card__label">{s.label}</div>
@@ -64,7 +62,8 @@ function ConfirmModal({ product, onConfirm, onCancel }) {
                 <h3 className="modal-box__title">Delete Product?</h3>
                 <p className="modal-box__body">
                     You're about to permanently delete{" "}
-                    <span className="modal-box__product-name">{product.name}</span>.<br />
+                    {/* Accessing English name */}
+                    <span className="modal-box__product-name">{product.name.en}</span>.<br />
                     This action cannot be undone.
                 </p>
                 <div className="modal-box__actions">
@@ -79,56 +78,61 @@ function ConfirmModal({ product, onConfirm, onCancel }) {
 /* ─── ProductCard ────────────────────────────────────── */
 function ProductCard({ p, onEdit, onDelete }) {
     const catStyle = getCategoryStyle(p.category);
-    const stock    = stockStatus(p.stock);
+    const stock = getStockBadge(p.isOutOfStock);
 
     return (
         <div className="product-card">
-            {/* Image */}
             <div className="product-card__image-wrap">
                 {p.image ? (
-                    <img src={p.image} alt={p.name} className="product-card__image" />
+                    <img 
+                        src={p.image} 
+                        alt={p.name.en} 
+                        className="product-card__image" 
+                        onError={(e) => {
+                            e.target.onerror = null; 
+                            e.target.src = "https://images.unsplash.com/photo-1506617424156-76ba6e9c93a2?q=80&w=800&auto=format&fit=crop";
+                        }}
+                    />
                 ) : (
-                    <div className="product-card__no-image">
-                        <div className="product-card__no-image-icon">🛒</div>
-                        <div className="product-card__no-image-text">No Image</div>
-                    </div>
+                    <div className="product-card__no-image">🛒</div>
                 )}
                 {p.category && (
-                    <span
-                        className="product-card__cat-badge"
-                        style={{ backgroundColor: catStyle.bg, color: catStyle.text }}
-                    >
+                    <span className="product-card__cat-badge" style={{ backgroundColor: catStyle.bg, color: catStyle.text }}>
                         {p.category}
                     </span>
                 )}
             </div>
 
-            {/* Body */}
             <div className="product-card__body">
                 <div>
-                    <h4 className="product-card__name">{p.name}</h4>
-                    {p.quantity && <p className="product-card__qty">{p.quantity}</p>}
-                </div>
-
-                <div className="product-card__meta">
-                    <span className="product-card__price">₹{p.price}</span>
-                    {stock && (
-                        <span
-                            className="stock-badge"
-                            style={{ backgroundColor: stock.bg, color: stock.color }}
-                        >
-                            {stock.label}
-                        </span>
+                    {/* Displaying Dual Language Names */}
+                    <h4 className="product-card__name">{p.name.en}</h4>
+                    <p className="product-card__pa-name">{p.name.pa}</p>
+                    {/* Displaying Object Quantity */}
+                    {p.quantity && (
+                        <p className="product-card__qty">{p.quantity.value} {p.quantity.unit}</p>
                     )}
                 </div>
 
+                <div className="product-card__meta">
+                    <div className="shop-card__price-box">
+                        {p.hasDiscount ? (
+                            <>
+                                <span className="shop-card__price">₹{p.discountPrice}</span>
+                                <span className="shop-card__old-price">₹{p.price}</span>
+                            </>
+                        ) : (
+                            <span className="shop-card__price">₹{p.price}</span>
+                        )}
+                    </div>
+                    <span className="stock-badge" style={{ backgroundColor: stock.bg, color: stock.color }}>
+                        {stock.label}
+                    </span>
+                </div>
+
                 <div className="product-card__actions">
-                    <button className="btn-edit" onClick={() => onEdit(p._id)}>
-                        ✏️ Edit
-                    </button>
-                    <button className="btn-delete" onClick={() => onDelete(p)}>
-                        🗑 Delete
-                    </button>
+                    <button className="btn-edit" onClick={() => onEdit(p._id)}>✏️ Edit</button>
+                    <button className="btn-delete" onClick={() => onDelete(p)}>🗑 Delete</button>
                 </div>
             </div>
         </div>
@@ -137,10 +141,10 @@ function ProductCard({ p, onEdit, onDelete }) {
 
 /* ─── Main Page ──────────────────────────────────────── */
 export default function Products() {
-    const [products, setProducts]       = useState([]);
-    const [search, setSearch]           = useState("");
-    const [filterCat, setFilterCat]     = useState("All");
-    const [pendingDelete, setPendingDelete] = useState(null); // product object | null
+    const [products, setProducts] = useState([]);
+    const [search, setSearch] = useState("");
+    const [filterCat, setFilterCat] = useState("All");
+    const [pendingDelete, setPendingDelete] = useState(null);
     const navigate = useNavigate();
     const { startLoading, stopLoading } = useLoading();
 
@@ -151,7 +155,6 @@ export default function Products() {
             setProducts(res.data.products || []);
         } catch (err) {
             console.error(err);
-            setProducts([]);
         } finally {
             stopLoading();
         }
@@ -161,42 +164,42 @@ export default function Products() {
 
     const confirmDelete = async () => {
         if (!pendingDelete) return;
-        const id = pendingDelete._id;
-        setPendingDelete(null);
         try {
-            await API.delete(`/products/${id}`);
-            await fetchProducts();
+            await API.delete(`/products/${pendingDelete._id}`);
+            setPendingDelete(null);
+            fetchProducts();
         } catch (err) {
             console.error(err);
-            stopLoading();
         }
     };
 
     const allCategories = ["All", ...new Set(products.map(p => p.category).filter(Boolean))];
+
     const displayed = products.filter(p => {
-        const matchCat    = filterCat === "All" || p.category === filterCat;
-        const matchSearch = p.name?.toLowerCase().includes(search.toLowerCase());
+        const matchCat = filterCat === "All" || p.category === filterCat;
+        // Search across BOTH English and Punjabi names
+        const searchStr = search.toLowerCase();
+        const matchSearch =
+            p.name.en.toLowerCase().includes(searchStr) ||
+            p.name.pa.toLowerCase().includes(searchStr);
         return matchCat && matchSearch;
     });
 
     return (
         <div className="page-wrapper">
-            {/* Header */}
             <div className="admin-header">
                 <div>
                     <h1 className="admin-header__title">🛍️ Inventory Management</h1>
-                    <p className="admin-header__subtitle">Track and manage your store's product catalogue</p>
+                    <p className="admin-header__subtitle">Manage bilingual products and stock levels</p>
                 </div>
                 <button className="admin-header__btn" onClick={() => navigate("/admin/add-product")}>
-                    + Add New Product
+                    + Add Product
                 </button>
             </div>
 
-            {/* Body */}
             <div className="admin-body">
                 {products.length > 0 && <StatsBar products={products} />}
 
-                {/* Toolbar */}
                 <div className="toolbar">
                     <div className="toolbar__search-wrap">
                         <span className="toolbar__search-icon">🔍</span>
@@ -204,11 +207,11 @@ export default function Products() {
                             className="toolbar__search"
                             value={search}
                             onChange={e => setSearch(e.target.value)}
-                            placeholder="Search products…"
+                            placeholder="Search in English or ਪੰਜਾਬੀ..."
                         />
                     </div>
                     <div className="toolbar__filters">
-                        {allCategories.slice(0, 6).map(cat => (
+                        {allCategories.map(cat => (
                             <button
                                 key={cat}
                                 onClick={() => setFilterCat(cat)}
@@ -218,28 +221,12 @@ export default function Products() {
                             </button>
                         ))}
                     </div>
-                    <div className="toolbar__count">
-                        {displayed.length} / {products.length}
-                    </div>
                 </div>
 
-                {/* Content */}
                 {displayed.length === 0 ? (
                     <div className="empty-state">
                         <div className="empty-state__icon">📭</div>
-                        <h3 className="empty-state__title">
-                            {search || filterCat !== "All" ? "No matching products" : "No products yet"}
-                        </h3>
-                        <p className="empty-state__text">
-                            {search || filterCat !== "All"
-                                ? "Try clearing your filters or searching for something else."
-                                : "Get started by adding your first product to the inventory."}
-                        </p>
-                        {!search && filterCat === "All" && (
-                            <button className="btn-primary" onClick={() => navigate("/admin/add-product")}>
-                                + Add First Product
-                            </button>
-                        )}
+                        <h3>No matching products</h3>
                     </div>
                 ) : (
                     <div className="products-grid">
@@ -255,7 +242,6 @@ export default function Products() {
                 )}
             </div>
 
-            {/* Confirm Delete Modal */}
             {pendingDelete && (
                 <ConfirmModal
                     product={pendingDelete}
