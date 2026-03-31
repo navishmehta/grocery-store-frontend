@@ -54,10 +54,7 @@ function ShopCard({ p }) {
                     <span className="shop-card__cat-badge">{p.category}</span>
                 )}
 
-                {/* Sale Badge */}
-                {p.hasDiscount && !p.isOutOfStock && (
-                    <span className="shop-card__sale-badge">SALE</span>
-                )}
+
             </div>
 
             {/* Body Section */}
