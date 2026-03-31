@@ -26,12 +26,12 @@ function ShopCard({ p }) {
             {/* Image Section */}
             <div className="shop-card__img-wrap">
                 {p.image ? (
-                    <img 
-                        src={p.image} 
-                        alt={p.name.en} 
-                        className="shop-card__img" 
+                    <img
+                        src={p.image}
+                        alt={p.name?.en || "Product"}
+                        className="shop-card__img"
                         onError={(e) => {
-                            e.target.onerror = null; 
+                            e.target.onerror = null;
                             e.target.src = "https://images.unsplash.com/photo-1506617424156-76ba6e9c93a2?q=80&w=800&auto=format&fit=crop";
                         }}
                     />
@@ -63,8 +63,8 @@ function ShopCard({ p }) {
             {/* Body Section */}
             <div className="product-card__body">
                 {/* Dual Language Names */}
-                <h2 className="shop-card__pa-name">{p.name.pa}</h2>
-                <p className="shop-card__name">{p.name.en}</p>
+                <h2 className="shop-card__pa-name">{p.name?.pa || ""}</h2>
+                <p className="shop-card__name">{p.name?.en || "Untitled"}</p>
 
                 {/* Quantity Object */}
                 <p className="shop-card__qty">

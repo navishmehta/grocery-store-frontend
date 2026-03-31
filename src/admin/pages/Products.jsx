@@ -63,7 +63,7 @@ function ConfirmModal({ product, onConfirm, onCancel }) {
                 <p className="modal-box__body">
                     You're about to permanently delete{" "}
                     {/* Accessing English name */}
-                    <span className="modal-box__product-name">{product.name.en}</span>.<br />
+                    <span className="modal-box__product-name">{product?.name?.en || "Unknown"}</span>.<br />
                     This action cannot be undone.
                 </p>
                 <div className="modal-box__actions">
@@ -84,12 +84,12 @@ function ProductCard({ p, onEdit, onDelete }) {
         <div className="product-card">
             <div className="product-card__image-wrap">
                 {p.image ? (
-                    <img 
-                        src={p.image} 
-                        alt={p.name.en} 
-                        className="product-card__image" 
+                    <img
+                        src={p.image}
+                        alt={p.name?.en || "Product"}
+                        className="product-card__image"
                         onError={(e) => {
-                            e.target.onerror = null; 
+                            e.target.onerror = null;
                             e.target.src = "https://images.unsplash.com/photo-1506617424156-76ba6e9c93a2?q=80&w=800&auto=format&fit=crop";
                         }}
                     />
@@ -106,8 +106,8 @@ function ProductCard({ p, onEdit, onDelete }) {
             <div className="product-card__body">
                 <div>
                     {/* Displaying Dual Language Names */}
-                    <h4 className="product-card__name">{p.name.en}</h4>
-                    <p className="product-card__pa-name">{p.name.pa}</p>
+                    <h4 className="product-card__name">{p.name?.en || "Untitled"}</h4>
+                    <p className="product-card__pa-name">{p.name?.pa || ""}</p>
                     {/* Displaying Object Quantity */}
                     {p.quantity && (
                         <p className="product-card__qty">{p.quantity.value} {p.quantity.unit}</p>
@@ -180,8 +180,8 @@ export default function Products() {
         // Search across BOTH English and Punjabi names
         const searchStr = search.toLowerCase();
         const matchSearch =
-            p.name.en.toLowerCase().includes(searchStr) ||
-            p.name.pa.toLowerCase().includes(searchStr);
+            (p.name?.en?.toLowerCase() || "").includes(searchStr) ||
+            (p.name?.pa?.toLowerCase() || "").includes(searchStr);
         return matchCat && matchSearch;
     });
 

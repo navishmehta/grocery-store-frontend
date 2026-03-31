@@ -104,11 +104,11 @@ export default function EditProduct() {
                     <div className="form-card__image-zone">
                         <div className="image-preview">
                             {preview ? (
-                                <img 
-                                    src={preview} 
-                                    alt="Preview" 
+                                <img
+                                    src={preview}
+                                    alt="Preview"
                                     onError={(e) => {
-                                        e.target.onerror = null; 
+                                        e.target.onerror = null;
                                         e.target.src = "https://images.unsplash.com/photo-1506617424156-76ba6e9c93a2?q=80&w=800&auto=format&fit=crop";
                                     }}
                                 />
