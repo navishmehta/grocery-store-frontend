@@ -1548,3 +1548,55 @@
   font-size: 0.85rem;
   margin-left: 8px;
 }
+
+/* Login Page Styles */
+.login-page {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  background-color: #f8fafc;
+  padding: 20px;
+}
+
+.login-card {
+  background: white;
+  padding: 2.5rem;
+  border-radius: 16px;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.05);
+  width: 100%;
+  max-width: 400px;
+}
+
+.login-card__header {
+  text-align: center;
+  margin-bottom: 2rem;
+}
+
+.login-card__logo {
+  font-size: 3rem;
+  display: block;
+  margin-bottom: 10px;
+}
+
+.login-card__title {
+  font-size: 1.5rem;
+  color: #1e293b;
+  font-weight: 800;
+}
+
+.login-card__sub {
+  color: #64748b;
+  font-size: 0.9rem;
+}
+
+.login-error-msg {
+  background-color: #fee2e2;
+  color: #dc2626;
+  padding: 10px;
+  border-radius: 8px;
+  font-size: 0.85rem;
+  margin-bottom: 1rem;
+  text-align: center;
+  border: 1px solid #fecaca;
+}
