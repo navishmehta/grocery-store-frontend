@@ -4,6 +4,8 @@ import API from "../services/api";
 import FilterSidebar from "../components/FilterSidebar";
 import ProductList from "../components/ProductList";
 import { useLoading } from "../context/LoadingContext";
+import ProductSearchBar from "../components/ProductSearchBar";
+import { filterProducts } from "../utils/filterUtils";
 import "../responsive.css";
 
 export default function ShopPage() {
@@ -12,8 +14,11 @@ export default function ShopPage() {
     const [drawerOpen, setDrawerOpen] = useState(false);
     const [params, setParams] = useSearchParams();
     const { startLoading, stopLoading } = useLoading();
+    const [search, setSearch] = useState("");
 
     const category = params.get("category") || null;
+
+    const displayed = filterProducts(products, search);
 
     useEffect(() => {
         const loadCategories = async () => {
@@ -60,6 +65,19 @@ export default function ShopPage() {
         setDrawerOpen(false);
     };
 
+    const [cartCount, setCartCount] = useState(0);
+
+    useEffect(() => {
+        const updateCount = () => {
+            const savedCart = JSON.parse(localStorage.getItem("cart")) || [];
+            const count = savedCart.reduce((total, item) => total + item.cartQty, 0);
+            setCartCount(count);
+        };
+        updateCount();
+        window.addEventListener("cartUpdated", updateCount);
+        return () => window.removeEventListener("cartUpdated", updateCount);
+    }, []);
+
     return (
         <div style={{ backgroundColor: "#f9fafb", minHeight: "100vh", fontFamily: "'Inter', 'Segoe UI', sans-serif" }}>
             {/* ── Info Bar ── */}
@@ -82,7 +100,7 @@ export default function ShopPage() {
 
             {/* ── Main Header ── */}
             <header className="shop-header">
-                <h1 className="shop-header__logo">
+                <h1 className="shop-header__logo" onClick={() => window.location.href = '/'} style={{ cursor: 'pointer' }}>
                     <span>Ramesh</span> Karayana <span>Store</span>
                 </h1>
                 <div className="shop-header__right">
@@ -92,8 +110,12 @@ export default function ShopPage() {
                     >
                         🎯 Filters
                     </button>
-                    <span className="shop-header__account">My Account</span>
-                    <div className="shop-header__avatar">R</div>
+
+                    <button className="cart-badge-btn" onClick={() => window.location.href = '/cart'}>
+                        <span className="cart-badge-btn__icon">🛒</span>
+                        <span className="cart-badge-btn__text">My Cart</span>
+                        {cartCount > 0 && <span className="cart-badge-btn__count">{cartCount}</span>}
+                    </button>
                 </div>
             </header>
 
@@ -140,10 +162,15 @@ export default function ShopPage() {
                     <h2 className="shop-main__heading">
                         {category ? category : "All Groceries"}
                     </h2>
+
+                    <div style={{ margin: "20px 0 30px" }}>
+                        <ProductSearchBar search={search} setSearch={setSearch} />
+                    </div>
+
                     <p className="shop-main__count">
-                        Showing {products.length} {products.length === 1 ? "result" : "results"} ready to buy
+                        Showing {displayed.length} {displayed.length === 1 ? "result" : "results"} ready to buy
                     </p>
-                    <ProductList products={products} />
+                    <ProductList products={displayed} />
                 </main>
             </div>
         </div>

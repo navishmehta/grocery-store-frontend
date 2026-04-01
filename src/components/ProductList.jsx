@@ -1,4 +1,5 @@
 import "../responsive.css";
+import { useToast } from "../context/ToastContext";
 
 export default function ProductList({ products }) {
     if (products.length === 0) {
@@ -21,6 +22,33 @@ export default function ProductList({ products }) {
 }
 
 function ShopCard({ p }) {
+    const { showToast } = useToast();
+
+    const addToCart = (product) => {
+        if (product.isOutOfStock) return;
+
+        const cart = JSON.parse(localStorage.getItem("cart")) || [];
+        const existing = cart.find(item => item._id === product._id);
+
+        if (existing) {
+            existing.cartQty += 1;
+        } else {
+            cart.push({
+                _id: product._id,
+                name: {
+                    en: product.nameEn,
+                    pa: product.namePa
+                },
+                price: product.hasDiscount ? product.discountPrice : product.price,
+                unitInfo: `${product.qtyValue} ${product.qtyUnit}`,
+                cartQty: 1
+            });
+        }
+        localStorage.setItem("cart", JSON.stringify(cart));
+        window.dispatchEvent(new Event("cartUpdated"));
+        showToast("Added to cart!", "success");
+    }
+
     return (
         <div className={`shop-card ${p.isOutOfStock ? "shop-card--muted" : ""}`}>
             {/* Image Section */}
@@ -80,7 +108,18 @@ function ShopCard({ p }) {
                         )}
                     </div>
 
-
+                    <button
+                        disabled={p.isOutOfStock}
+                        onClick={() => addToCart(p)}
+                        className={p.isOutOfStock ? "btn-disabled" : "btn-add"}
+                    >
+                        {p.isOutOfStock ? "Out of Stock" : (
+                            <>
+                                <span>➕</span>
+                                Add to Cart
+                            </>
+                        )}
+                    </button>
                 </div>
             </div>
         </div>

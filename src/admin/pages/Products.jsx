@@ -2,6 +2,8 @@ import { useEffect, useState } from "react";
 import API from "../../services/api";
 import { useNavigate } from "react-router-dom";
 import { useLoading } from "../../context/LoadingContext";
+import ProductSearchBar, { CategoryFilter } from "../../components/ProductSearchBar";
+import { filterProducts } from "../../utils/filterUtils";
 import "../../responsive.css";
 
 /* ─── Helpers ───────────────────────────────────────── */
@@ -17,7 +19,6 @@ const CATEGORY_COLORS = {
 };
 const getCategoryStyle = (cat) => CATEGORY_COLORS[cat] || { bg: "#f3f4f6", text: "#374151" };
 
-// Updated for Boolean Stock Status
 const getStockBadge = (isOutOfStock) => {
     if (isOutOfStock) return { label: "Out of Stock", bg: "#fee2e2", color: "#dc2626" };
     return { label: "In Stock", bg: "#f0fdf4", color: "#16a34a" };
@@ -26,7 +27,6 @@ const getStockBadge = (isOutOfStock) => {
 /* ─── StatsBar ───────────────────────────────────────── */
 function StatsBar({ products }) {
     const total = products.length;
-    // Filter by Boolean instead of 0
     const outStock = products.filter(p => p.isOutOfStock).length;
     const discounted = products.filter(p => p.hasDiscount).length;
     const categories = new Set(products.map(p => p.category).filter(Boolean)).size;
@@ -62,7 +62,6 @@ function ConfirmModal({ product, onConfirm, onCancel }) {
                 <h3 className="modal-box__title">Delete Product?</h3>
                 <p className="modal-box__body">
                     You're about to permanently delete{" "}
-                    {/* Accessing English name */}
                     <span className="modal-box__product-name">{product?.nameEn || "Unknown"}</span>.<br />
                     This action cannot be undone.
                 </p>
@@ -105,10 +104,8 @@ function ProductCard({ p, onEdit, onDelete }) {
 
             <div className="product-card__body">
                 <div>
-                    {/* Displaying Dual Language Names */}
                     <h4 className="product-card__name">{p.nameEn || "Untitled"}</h4>
                     <p className="product-card__pa-name">{p.namePa || ""}</p>
-                    {/* Displaying Object Quantity */}
                     {p.qtyValue && (
                         <p className="product-card__qty">{p.qtyValue} {p.qtyUnit}</p>
                     )}
@@ -174,16 +171,7 @@ export default function Products() {
     };
 
     const allCategories = ["All", ...new Set(products.map(p => p.category).filter(Boolean))];
-
-    const displayed = products.filter(p => {
-        const matchCat = filterCat === "All" || p.category === filterCat;
-        // Search across BOTH English and Punjabi names
-        const searchStr = search.toLowerCase();
-        const matchSearch =
-            (p.nameEn?.toLowerCase() || "").includes(searchStr) ||
-            (p.namePa?.toLowerCase() || "").includes(searchStr);
-        return matchCat && matchSearch;
-    });
+    const displayed = filterProducts(products, search, filterCat);
 
     const handleLogout = () => {
         localStorage.removeItem("adminToken");
@@ -207,26 +195,12 @@ export default function Products() {
                 {products.length > 0 && <StatsBar products={products} />}
 
                 <div className="toolbar">
-                    <div className="toolbar__search-wrap">
-                        <span className="toolbar__search-icon">🔍</span>
-                        <input
-                            className="toolbar__search"
-                            value={search}
-                            onChange={e => setSearch(e.target.value)}
-                            placeholder="Search in English or ਪੰਜਾਬੀ..."
-                        />
-                    </div>
-                    <div className="toolbar__filters">
-                        {allCategories.map(cat => (
-                            <button
-                                key={cat}
-                                onClick={() => setFilterCat(cat)}
-                                className={`filter-pill${filterCat === cat ? " filter-pill--active" : ""}`}
-                            >
-                                {cat}
-                            </button>
-                        ))}
-                    </div>
+                    <ProductSearchBar search={search} setSearch={setSearch} />
+                    <CategoryFilter 
+                        categories={allCategories} 
+                        filterCat={filterCat} 
+                        setFilterCat={setFilterCat} 
+                    />
                 </div>
 
                 {displayed.length === 0 ? (
@@ -248,15 +222,13 @@ export default function Products() {
                 )}
             </div>
 
-            {
-                pendingDelete && (
-                    <ConfirmModal
-                        product={pendingDelete}
-                        onConfirm={confirmDelete}
-                        onCancel={() => setPendingDelete(null)}
-                    />
-                )
-            }
-        </div >
+            {pendingDelete && (
+                <ConfirmModal
+                    product={pendingDelete}
+                    onConfirm={confirmDelete}
+                    onCancel={() => setPendingDelete(null)}
+                />
+            )}
+        </div>
     );
 }
