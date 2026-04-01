@@ -185,9 +185,13 @@ export default function Products() {
                     <h1 className="admin-header__title">🛍️ Inventory Management</h1>
                     <p className="admin-header__subtitle">Manage bilingual products and stock levels</p>
                 </div>
-                <div style={{ display: 'flex', gap: '10px' }}>
-                    <button className="admin-header__btn" onClick={() => navigate("/admin/add-product")}>+ Add Product</button>
-                    <button className="btn-cancel" onClick={handleLogout}>Logout</button>
+                <div className="admin-header__actions">
+                    <button className="admin-header__btn" onClick={() => navigate("/admin/add-product")}>
+                        + Add Product
+                    </button>
+                    <button className="admin-header__btn admin-header__btn--logout" onClick={handleLogout}>
+                        Logout
+                    </button>
                 </div>
             </div>
 

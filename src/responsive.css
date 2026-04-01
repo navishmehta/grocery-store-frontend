@@ -64,24 +64,45 @@
   margin: 6px 0 0;
 }
 
+.admin-header__actions {
+  display: flex;
+  gap: 12px;
+}
+
 .admin-header__btn {
-  padding: 13px 28px;
+  padding: 12px 24px;
   background-color: white;
   color: #4f46e5;
   border: none;
   border-radius: 12px;
-  font-size: 15px;
+  font-size: 14px;
   font-weight: 700;
   cursor: pointer;
-  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.18);
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.12);
   transition: all 0.2s;
   font-family: inherit;
   white-space: nowrap;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .admin-header__btn:hover {
-  transform: scale(1.04);
-  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.22);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.18);
+}
+
+.admin-header__btn--logout {
+  background-color: rgba(255, 255, 255, 0.15);
+  color: white;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  box-shadow: none;
+}
+
+.admin-header__btn--logout:hover {
+  background-color: white;
+  color: #ef4444; /* Give logout a hint of red on hover for intuitive feedback */
+  border-color: white;
 }
 
 /* Back-header (Add / Edit pages) */
@@ -1215,16 +1236,23 @@
 
   /* Admin header stacks */
   .admin-header {
-    padding: 18px 20px;
+    padding: 24px 20px;
     flex-direction: column;
-    align-items: flex-start;
+    align-items: center; /* Center header content on mobile */
+    text-align: center;
+    gap: 20px;
   }
 
-  .admin-header__title {
-    font-size: 22px;
+  .admin-header__actions {
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    gap: 10px;
   }
 
-  .admin-header__subtitle {
+  .admin-header__btn {
+    flex: 1; /* Make buttons equal width on mobile */
+    padding: 11px 16px;
     font-size: 13px;
   }
 
