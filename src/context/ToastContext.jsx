@@ -6,13 +6,15 @@ export function ToastProvider({ children }) {
     const [toasts, setToasts] = useState([]);
 
     const showToast = useCallback((message, type = "info", duration = 4000) => {
-        const id = Math.random().toString(36).substring(2, 9);
-        setToasts(prev => [...prev, { id, message, type }]);
+        const id = Date.now();
+        // Clear previous toasts to ensure only one is visible at a time
+        setToasts([{ id, message, type }]);
 
         setTimeout(() => {
             setToasts(prev => prev.filter(t => t.id !== id));
         }, duration);
     }, []);
+
 
     return (
         <ToastContext.Provider value={{ showToast }}>

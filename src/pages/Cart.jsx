@@ -11,6 +11,7 @@ import { filterProducts } from "../utils/filterUtils";
 export default function Cart() {
     const [cart, setCart] = useState([]);
     const [search, setSearch] = useState("");
+    const [customerName, setCustomerName] = useState("");
     const navigate = useNavigate();
     const { showToast } = useToast();
 
@@ -57,8 +58,37 @@ export default function Cart() {
             }
 
             const doc = new jsPDF();
-            doc.setFontSize(18);
-            doc.text("Grocery Estimate", 14, 20);
+
+            // Store Title
+            doc.setFontSize(22);
+            doc.setTextColor(16, 185, 129); // Green color
+            doc.setFont("helvetica", "bold");
+            doc.text("Ramesh Karayana Store", 14, 22);
+
+            // Store Address & Phone
+            doc.setFontSize(10);
+            doc.setTextColor(100);
+            doc.setFont("helvetica", "normal");
+            doc.text("Noordi Bazar, Tarn Taran | Phone: 98152 62920", 14, 30);
+
+            // User & Date
+            doc.setFontSize(10);
+            doc.setTextColor(0);
+            const dateStr = `Date: ${new Date().toLocaleDateString()}`;
+            const preparedByStr = customerName ? `Prepared By: ${customerName}` : "";
+            doc.text(dateStr, 196, 22, { align: 'right' });
+            if (preparedByStr) {
+                doc.text(preparedByStr, 196, 30, { align: 'right' });
+            }
+
+            // Separator line
+            doc.setDrawColor(226, 232, 240);
+            doc.line(14, 35, 196, 35);
+
+            // Estimate Title
+            doc.setFontSize(16);
+            doc.setFont("helvetica", "bold");
+            doc.text("Grocery Estimate", 14, 45);
 
             const tableRows = cart.map(item => [
                 item.name.en,
@@ -69,16 +99,37 @@ export default function Cart() {
             ]);
 
             autoTable(doc, {
-                startY: 30,
+                startY: 52,
                 head: [['Product', 'Unit', 'Qty', 'Rate', 'Subtotal']],
                 body: tableRows,
                 theme: 'grid',
-                headStyles: { fillColor: [16, 185, 129] }
+                headStyles: { fillColor: [16, 185, 129] },
+                styles: { fontSize: 10 }
             });
 
-            const total = cart.reduce((sum, item) => sum + (item.price * item.cartQty), 0);
+            const subtotalOriginal = cart.reduce((sum, item) => sum + ((item.originalPrice || item.price) * item.cartQty), 0);
+            const totalFinal = cart.reduce((sum, item) => sum + (item.price * item.cartQty), 0);
+            const discountAmt = subtotalOriginal - totalFinal;
+
+            let currentY = doc.lastAutoTable.finalY + 15;
+
+            doc.setFontSize(10);
+            doc.setFont("helvetica", "normal");
+            doc.setTextColor(100);
+            doc.text(`Subtotal (Actual Price): Rs. ${subtotalOriginal}`, 14, currentY);
+
+            if (discountAmt > 0) {
+                currentY += 7;
+                doc.setTextColor(16, 185, 129); // Green color for savings
+                doc.text(`Discount / Savings: -Rs. ${discountAmt}`, 14, currentY);
+            }
+
+            currentY += 10;
             doc.setFontSize(14);
-            doc.text(`Estimated Total: Rs. ${total}`, 14, doc.lastAutoTable.finalY + 15);
+            doc.setFont("helvetica", "bold");
+            doc.setTextColor(0);
+            doc.text(`Total Amount: Rs. ${totalFinal}`, 14, currentY);
+
 
             return doc;
 
@@ -88,20 +139,28 @@ export default function Cart() {
     }
 
     const handleDownload = async () => {
+        if (!customerName.trim()) {
+            showToast("Please enter a Customer Name before downloading.", "danger");
+            return;
+        }
         const doc = await preparePDF();
-        if (doc) doc.save("My_Grocery_List.pdf");
+        if (doc) doc.save(`${customerName.replace(/\s+/g, '_')}_Estimate.pdf`);
     };
 
     const [showPreview, setShowPreview] = useState(false);
 
     const handleView = async () => {
-        // Instead of generating a PDF blob, we just show our internal HTML preview
+        if (!customerName.trim()) {
+            showToast("Please enter a Customer Name before viewing the estimate.", "danger");
+            return;
+        }
         setShowPreview(true);
     };
 
     const displayed = filterProducts(cart, search);
-    const total = cart.reduce((sum, item) => sum + (item.price * item.cartQty), 0);
-
+    const subtotalOriginal = cart.reduce((sum, item) => sum + ((item.originalPrice || item.price) * item.cartQty), 0);
+    const totalFinal = cart.reduce((sum, item) => sum + (item.price * item.cartQty), 0);
+    const discountAmount = subtotalOriginal - totalFinal;
 
     if (showPreview) {
         return (
@@ -115,69 +174,79 @@ export default function Cart() {
                         Download PDF
                     </button>
                 </div>
-                
+
                 <div className="estimate-html-preview">
-                   <div className="estimate-card">
-                       <div className="estimate-card__header">
-                           <div className="store-info">
-                               <h1 className="shop-header__logo"><span>Ramesh</span> Karayana <span>Store</span></h1>
-                               <p>📍 Noordi Bazar, Tarn Taran</p>
-                               <p>📞 98152 62920</p>
-                           </div>
-                           <div className="estimate-badge">Grocery Estimate</div>
-                       </div>
-                       
-                       <div className="estimate-date">Date: {new Date().toLocaleDateString()}</div>
-                       
-                       <div className="estimate-table-wrap">
-                           <table className="estimate-table">
-                               <thead>
-                                   <tr>
-                                       <th>Product</th>
-                                       <th>Unit</th>
-                                       <th>Qty</th>
-                                       <th>Rate</th>
-                                       <th>Subtotal</th>
-                                   </tr>
-                               </thead>
-                               <tbody>
-                                   {cart.map((item, idx) => (
-                                       <tr key={idx}>
-                                           <td>
-                                               <div className="item-name">{item.name?.en}</div>
-                                               <div className="item-pa">{item.name?.pa}</div>
-                                           </td>
-                                           <td>{item.unitInfo}</td>
-                                           <td>{item.cartQty}</td>
-                                           <td>₹{item.price}</td>
-                                           <td>₹{item.price * item.cartQty}</td>
-                                       </tr>
-                                   ))}
-                               </tbody>
-                           </table>
-                       </div>
-                       
-                       <div className="estimate-total-section">
-                           <div className="total-line">
-                               <span>Subtotal</span>
-                               <span>₹{total}</span>
-                           </div>
-                           <div className="total-line main-total">
-                               <span>Estimated Total</span>
-                               <span>₹{total}</span>
-                           </div>
-                       </div>
-                       
-                       <div className="estimate-footer">
-                           <p>* Prices are subject to market availability.</p>
-                           <p>Thank you for shopping with us!</p>
-                       </div>
-                   </div>
+                    <div className="estimate-card">
+                        <div className="estimate-card__header">
+                            <div className="store-info">
+                                <h1 className="shop-header__logo"><span>Ramesh</span> Karayana <span>Store</span></h1>
+                                <p>📍 Noordi Bazar, Tarn Taran</p>
+                                <p>📞 98152 62920</p>
+                            </div>
+                            <div className="estimate-badge">Grocery Estimate</div>
+                        </div>
+
+                        <div className="estimate-meta-row">
+                            <div className="prepared-by">
+                                {customerName && <span><strong>Prepared By:</strong> {customerName}</span>}
+                            </div>
+                            <div className="estimate-date">Date: {new Date().toLocaleDateString()}</div>
+                        </div>
+
+                        <div className="estimate-table-wrap">
+                            <table className="estimate-table">
+                                <thead>
+                                    <tr>
+                                        <th>Product</th>
+                                        <th>Unit</th>
+                                        <th>Qty</th>
+                                        <th>Rate</th>
+                                        <th>Subtotal</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {cart.map((item, idx) => (
+                                        <tr key={idx}>
+                                            <td>
+                                                <div className="item-name">{item.name?.en}</div>
+                                                <div className="item-pa">{item.name?.pa}</div>
+                                            </td>
+                                            <td>{item.unitInfo}</td>
+                                            <td>{item.cartQty}</td>
+                                            <td>₹{item.price}</td>
+                                            <td>₹{item.price * item.cartQty}</td>
+                                        </tr>
+                                    ))}
+                                </tbody>
+                            </table>
+                        </div>
+
+                        <div className="estimate-total-section">
+                            <div className="total-line">
+                                <span>Actual Price (Subtotal)</span>
+                                <span>₹{subtotalOriginal}</span>
+                            </div>
+                            {discountAmount > 0 && (
+                                <div className="total-line">
+                                    <span>Discount / Savings</span>
+                                    <span style={{ color: '#16a34a', fontWeight: '700' }}>- ₹{discountAmount}</span>
+                                </div>
+                            )}
+                            <div className="total-line main-total">
+                                <span>Final Estimated Total</span>
+                                <span>₹{totalFinal}</span>
+                            </div>
+                        </div>
+
+                        <div className="estimate-footer">
+                            <p>* Prices are subject to market availability.</p>
+                            <p>Thank you for shopping with us!</p>
+                        </div>
+                    </div>
                 </div>
             </div>
         );
     }
-
 
     return (
         <div className="page-wrapper" style={{ backgroundColor: "#f8fafc" }}>
@@ -194,10 +263,10 @@ export default function Cart() {
             <div className="cart-layout-container">
                 {cart.length > 0 && (
                     <div style={{ marginBottom: '24px' }}>
-                        <ProductSearchBar 
-                            search={search} 
-                            setSearch={setSearch} 
-                            placeholder="Search in your list..." 
+                        <ProductSearchBar
+                            search={search}
+                            setSearch={setSearch}
+                            placeholder="Search in your list..."
                         />
                     </div>
                 )}
@@ -257,25 +326,40 @@ export default function Cart() {
                         <aside className="cart-summary-section">
                             <div className="summary-card">
                                 <h3>Order Summary</h3>
-                                <div className="summary-line">
-                                    <span>Subtotal</span>
-                                    <span>₹{total}</span>
+
+                                {/* Customer Info Input */}
+                                <div className="customer-info-box">
+                                    <label>Customer Name / Person Name</label>
+                                    <input
+                                        type="text"
+                                        value={customerName}
+                                        onChange={(e) => setCustomerName(e.target.value)}
+                                        placeholder="Who is this list for?"
+                                        className="customer-input"
+                                    />
                                 </div>
+
                                 <div className="summary-line">
-                                    <span>Estimated GST</span>
-                                    <span>Included</span>
+                                    <span>Subtotal (Actual Price)</span>
+                                    <span className="price-span">₹{subtotalOriginal}</span>
                                 </div>
+                                {discountAmount > 0 && (
+                                    <div className="summary-line savings-line">
+                                        <span>Discount</span>
+                                        <span style={{ color: '#16a34a', fontWeight: '700' }}>- ₹{discountAmount}</span>
+                                    </div>
+                                )}
                                 <div className="summary-total">
                                     <span>Total Amount</span>
-                                    <span>₹{total}</span>
+                                    <span>₹{totalFinal}</span>
                                 </div>
 
                                 <div className="summary-actions">
                                     <button className="btn-view-est" onClick={handleView}>
-                                        👁️ View Estimate (PDF)
+                                        👁️ View Estimate
                                     </button>
                                     <button className="btn-download-est" onClick={handleDownload}>
-                                        📄 Download Estimate
+                                        📄 Download PDF
                                     </button>
                                     <p className="summary-disclaimer">
                                         * Prices are estimated and subject to market availability at the store.

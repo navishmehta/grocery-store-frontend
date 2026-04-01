@@ -40,9 +40,12 @@ function ShopCard({ p }) {
                     pa: product.namePa
                 },
                 price: product.hasDiscount ? product.discountPrice : product.price,
+                originalPrice: product.price,
+                hasDiscount: product.hasDiscount,
                 unitInfo: `${product.qtyValue} ${product.qtyUnit}`,
                 cartQty: 1
             });
+
         }
         localStorage.setItem("cart", JSON.stringify(cart));
         window.dispatchEvent(new Event("cartUpdated"));

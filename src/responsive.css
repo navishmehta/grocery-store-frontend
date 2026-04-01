@@ -1977,6 +1977,10 @@
   font-weight: 500;
 }
 
+.price-span {
+  color: black;
+}
+
 .summary-total {
   display: flex;
   justify-content: space-between;
@@ -2101,7 +2105,7 @@
     gap: 16px;
     padding: 16px;
   }
-  
+
   .cart-item-row__actions {
     width: 100%;
     display: flex;
@@ -2109,11 +2113,13 @@
     align-items: center;
     border-top: 1px solid #f1f5f9;
     padding-top: 16px;
-    gap: 8px; /* Control gap between groups */
+    gap: 8px;
+    /* Control gap between groups */
   }
 
   .qty-controls {
-    transform: scale(0.9); /* Slightly smaller on phones */
+    transform: scale(0.9);
+    /* Slightly smaller on phones */
     transform-origin: left center;
   }
 
@@ -2142,7 +2148,8 @@
   left: 0;
   width: 100vw;
   height: 100vh;
-  background-color: #f1f5f9; /* Slate bg for contrast */
+  background-color: #f1f5f9;
+  /* Slate bg for contrast */
   z-index: 1000;
   display: flex;
   flex-direction: column;
@@ -2247,11 +2254,23 @@
   font-size: 11px;
 }
 
+.estimate-meta-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 30px;
+}
+
+.prepared-by {
+  font-size: 14px;
+  color: #1e293b;
+}
+
 .estimate-date {
   color: #94a3b8;
-  font-size: 13px;
-  margin-bottom: 24px;
+  font-size: 14px;
   text-align: right;
+  margin-bottom: 0;
 }
 
 .estimate-table-wrap {
@@ -2279,8 +2298,15 @@
   font-size: 14px;
 }
 
-.item-name { font-weight: 700; }
-.item-pa { font-size: 12px; color: #64748b; margin-top: 2px; }
+.item-name {
+  font-weight: 700;
+}
+
+.item-pa {
+  font-size: 12px;
+  color: #64748b;
+  margin-top: 2px;
+}
 
 .estimate-total-section {
   margin-left: auto;
@@ -2319,6 +2345,7 @@
     height: 60px;
     gap: 8px;
   }
+
   .pdf-viewer-header h2 {
     font-size: 15px;
     text-align: center;
@@ -2327,21 +2354,27 @@
     overflow: hidden;
     text-overflow: ellipsis;
   }
-  .pdf-viewer-back, .pdf-viewer-download {
+
+  .pdf-viewer-back,
+  .pdf-viewer-download {
     padding: 8px 12px;
     font-size: 11px;
     border-radius: 10px;
   }
+
   .estimate-html-preview {
     padding: 20px 10px;
   }
+
   .estimate-card {
     padding: 30px 16px;
   }
+
   .estimate-card__header {
     flex-direction: column;
     gap: 16px;
   }
+
   .estimate-total-section {
     width: 100%;
   }
@@ -2552,11 +2585,46 @@
 }
 
 .summary-card h3 {
-  margin: 0 0 24px;
+  margin: 0 0 16px;
   font-size: 20px;
   font-weight: 800;
   color: #1e293b;
 }
+
+.customer-info-box {
+  margin-bottom: 24px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid #f1f5f9;
+}
+
+.customer-info-box label {
+  display: block;
+  font-size: 11px;
+  font-weight: 700;
+  color: #64748b;
+  margin-bottom: 6px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.customer-input {
+  width: 100%;
+  padding: 10px 14px;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  font-size: 14px;
+  font-family: inherit;
+  transition: all 0.2s;
+  background: #f8fafc;
+}
+
+.customer-input:focus {
+  outline: none;
+  border-color: #10b981;
+  background: white;
+  box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.1);
+}
+
 
 .summary-line {
   display: flex;
