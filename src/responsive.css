@@ -2188,6 +2188,7 @@
     height: 64px;
   }
 }
+
 /* ================================================================
    MODERN CART REDESIGN
    ================================================================ */
@@ -2315,7 +2316,7 @@
   border-radius: 10px;
   border: none;
   background: white;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
   font-size: 18px;
   font-weight: 600;
   color: #1e293b;
@@ -2372,8 +2373,9 @@
 
 .remove-btn:hover {
   background: #ffe4e6;
-  transform: scale(1.
+  transform: scale(1.05);
 }
+
 
 .summary-card {
   background: white;
@@ -2422,7 +2424,8 @@
   gap: 12px;
 }
 
-.btn-view-est, .btn-download-est {
+.btn-view-est,
+.btn-download-est {
   padding: 16px;
   border-radius: 16px;
   border: none;
@@ -2491,7 +2494,7 @@
   .cart-grid {
     grid-template-columns: 1fr;
   }
-  
+
   .summary-card {
     position: static;
   }
@@ -2501,16 +2504,16 @@
   .cart-page-header {
     padding: 24px 20px;
   }
-  
+
   .cart-layout-container {
     padding: 0 20px;
     margin: 24px auto;
   }
-  
+
   .cart-item-row {
     padding: 16px;
   }
-  
+
   .cart-item-row__actions {
     gap: 20px;
   }
@@ -2522,7 +2525,7 @@
     align-items: flex-start;
     gap: 20px;
   }
-  
+
   .cart-item-row__actions {
     width: 100%;
     justify-content: space-between;
