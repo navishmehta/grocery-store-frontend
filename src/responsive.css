@@ -876,6 +876,8 @@
   justify-content: space-between;
   align-items: center;
   margin-top: auto;
+  gap: 12px;
+  flex-wrap: wrap; /* Fallback for very small cards */
 }
 
 .shop-card__price {
@@ -1625,8 +1627,8 @@
   color: white;
   border: none;
   border-radius: 12px;
-  padding: 10px 18px;
-  font-size: 14px;
+  padding: 10px 14px; /* Reduced side padding slightly */
+  font-size: 13px; /* Slightly smaller font to fit better */
   font-weight: 700;
   cursor: pointer;
   transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
@@ -1634,8 +1636,10 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 8px;
+  gap: 6px;
   font-family: inherit;
+  white-space: nowrap; /* Prevent "Add to Cart" from breaking into multiple lines */
+  flex-shrink: 0;
 }
 
 .btn-add:hover {
@@ -1825,9 +1829,11 @@
   display: flex;
   flex-direction: column;
   gap: 16px;
+  width: 100%;
 }
 
 .cart-item-row {
+  width: 100%;
   background: white;
   border-radius: 20px;
   padding: 24px;
