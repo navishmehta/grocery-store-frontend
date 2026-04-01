@@ -92,37 +92,92 @@ export default function Cart() {
         if (doc) doc.save("My_Grocery_List.pdf");
     };
 
+    const [showPreview, setShowPreview] = useState(false);
+
     const handleView = async () => {
-        const doc = await preparePDF();
-        if (doc) {
-            const blobUrl = doc.output('bloburl');
-            setPdfUrl(blobUrl);
-        }
+        // Instead of generating a PDF blob, we just show our internal HTML preview
+        setShowPreview(true);
     };
 
     const displayed = filterProducts(cart, search);
     const total = cart.reduce((sum, item) => sum + (item.price * item.cartQty), 0);
 
-    if (pdfUrl) {
+
+    if (showPreview) {
         return (
             <div className="pdf-viewer-container">
                 <div className="pdf-viewer-header">
-                    <button className="pdf-viewer-back" onClick={() => setPdfUrl(null)}>
+                    <button className="pdf-viewer-back" onClick={() => setShowPreview(false)}>
                         ← Back to Cart
                     </button>
                     <h2>Estimate Preview</h2>
-                    <a href={pdfUrl} download="My_Grocery_List.pdf" className="pdf-viewer-download">
+                    <button onClick={handleDownload} className="pdf-viewer-download">
                         Download PDF
-                    </a>
+                    </button>
                 </div>
-                <iframe 
-                    src={pdfUrl} 
-                    title="PDF Preview"
-                    className="pdf-viewer-frame"
-                />
+                
+                <div className="estimate-html-preview">
+                   <div className="estimate-card">
+                       <div className="estimate-card__header">
+                           <div className="store-info">
+                               <h1 className="shop-header__logo"><span>Ramesh</span> Karayana <span>Store</span></h1>
+                               <p>📍 Noordi Bazar, Tarn Taran</p>
+                               <p>📞 98152 62920</p>
+                           </div>
+                           <div className="estimate-badge">Grocery Estimate</div>
+                       </div>
+                       
+                       <div className="estimate-date">Date: {new Date().toLocaleDateString()}</div>
+                       
+                       <div className="estimate-table-wrap">
+                           <table className="estimate-table">
+                               <thead>
+                                   <tr>
+                                       <th>Product</th>
+                                       <th>Unit</th>
+                                       <th>Qty</th>
+                                       <th>Rate</th>
+                                       <th>Subtotal</th>
+                                   </tr>
+                               </thead>
+                               <tbody>
+                                   {cart.map((item, idx) => (
+                                       <tr key={idx}>
+                                           <td>
+                                               <div className="item-name">{item.name?.en}</div>
+                                               <div className="item-pa">{item.name?.pa}</div>
+                                           </td>
+                                           <td>{item.unitInfo}</td>
+                                           <td>{item.cartQty}</td>
+                                           <td>₹{item.price}</td>
+                                           <td>₹{item.price * item.cartQty}</td>
+                                       </tr>
+                                   ))}
+                               </tbody>
+                           </table>
+                       </div>
+                       
+                       <div className="estimate-total-section">
+                           <div className="total-line">
+                               <span>Subtotal</span>
+                               <span>₹{total}</span>
+                           </div>
+                           <div className="total-line main-total">
+                               <span>Estimated Total</span>
+                               <span>₹{total}</span>
+                           </div>
+                       </div>
+                       
+                       <div className="estimate-footer">
+                           <p>* Prices are subject to market availability.</p>
+                           <p>Thank you for shopping with us!</p>
+                       </div>
+                   </div>
+                </div>
             </div>
         );
     }
+
 
     return (
         <div className="page-wrapper" style={{ backgroundColor: "#f8fafc" }}>
@@ -190,7 +245,7 @@ export default function Cart() {
                                             </div>
 
                                             <button className="remove-btn" onClick={() => removeItem(item._id)} title="Remove item">
-                                                🗑️ delete
+                                                🗑️
                                             </button>
                                         </div>
                                     </div>

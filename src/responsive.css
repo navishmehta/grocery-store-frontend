@@ -2098,19 +2098,43 @@
   .cart-item-row {
     flex-direction: column;
     align-items: flex-start;
-    gap: 20px;
+    gap: 16px;
+    padding: 16px;
   }
-
+  
   .cart-item-row__actions {
     width: 100%;
+    display: flex;
     justify-content: space-between;
+    align-items: center;
     border-top: 1px solid #f1f5f9;
     padding-top: 16px;
+    gap: 8px; /* Control gap between groups */
+  }
+
+  .qty-controls {
+    transform: scale(0.9); /* Slightly smaller on phones */
+    transform-origin: left center;
+  }
+
+  .price-info {
+    text-align: center;
+    flex: 1;
+  }
+
+  .price-info .subtotal {
+    font-size: 18px;
+  }
+
+  .remove-btn {
+    width: 36px;
+    height: 36px;
+    font-size: 16px;
   }
 }
 
 /* ──────────────────────────────────────────────
-   15. PDF VIEWER (In-app)
+   15. ESTIMATE PREVIEW (In-app HTML)
    ────────────────────────────────────────────── */
 .pdf-viewer-container {
   position: fixed;
@@ -2118,7 +2142,7 @@
   left: 0;
   width: 100vw;
   height: 100vh;
-  background-color: #f8fafc;
+  background-color: #f1f5f9; /* Slate bg for contrast */
   z-index: 1000;
   display: flex;
   flex-direction: column;
@@ -2167,25 +2191,165 @@
   text-decoration: none;
   font-weight: 700;
   font-size: 14px;
+  border: none;
+  cursor: pointer;
   box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
   transition: all 0.2s;
 }
 
-.pdf-viewer-download:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 6px 16px rgba(16, 185, 129, 0.4);
+.estimate-html-preview {
+  flex: 1;
+  overflow-y: auto;
+  padding: 40px 20px;
+  display: flex;
+  justify-content: center;
 }
 
-.pdf-viewer-frame {
-  flex: 1;
-  border: none;
+.estimate-card {
+  background: white;
   width: 100%;
+  max-width: 800px;
+  min-height: 800px;
+  padding: 50px;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.05);
+  border-radius: 4px;
+  display: flex;
+  flex-direction: column;
+}
+
+.estimate-card__header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 40px;
+  padding-bottom: 24px;
+  border-bottom: 2px solid #f1f5f9;
+}
+
+.store-info h1 {
+  font-size: 22px;
+  margin: 0 0 6px;
+}
+
+.store-info p {
+  margin: 0;
+  color: #64748b;
+  font-size: 13px;
+}
+
+.estimate-badge {
+  background: #dcfce7;
+  color: #16a34a;
+  padding: 6px 12px;
+  border-radius: 8px;
+  font-weight: 800;
+  text-transform: uppercase;
+  font-size: 11px;
+}
+
+.estimate-date {
+  color: #94a3b8;
+  font-size: 13px;
+  margin-bottom: 24px;
+  text-align: right;
+}
+
+.estimate-table-wrap {
+  margin-bottom: 30px;
+}
+
+.estimate-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.estimate-table th {
+  text-align: left;
+  background: #f8fafc;
+  padding: 12px;
+  font-size: 12px;
+  color: #475569;
+  text-transform: uppercase;
+}
+
+.estimate-table td {
+  padding: 14px 12px;
+  border-bottom: 1px solid #f1f5f9;
+  color: #1e293b;
+  font-size: 14px;
+}
+
+.item-name { font-weight: 700; }
+.item-pa { font-size: 12px; color: #64748b; margin-top: 2px; }
+
+.estimate-total-section {
+  margin-left: auto;
+  width: 260px;
+  padding-top: 20px;
+}
+
+.total-line {
+  display: flex;
+  justify-content: space-between;
+  padding: 6px 0;
+  color: #64748b;
+  font-size: 14px;
+}
+
+.main-total {
+  border-top: 2px solid #10b981;
+  margin-top: 10px;
+  padding-top: 14px;
+  color: #10b981;
+  font-size: 18px;
+  font-weight: 900;
+}
+
+.estimate-footer {
+  margin-top: auto;
+  text-align: center;
+  padding-top: 50px;
+  color: #94a3b8;
+  font-size: 12px;
 }
 
 @media (max-width: 768px) {
   .pdf-viewer-header {
-    padding: 0 20px;
-    height: 64px;
+    padding: 0 16px;
+    height: 60px;
+    gap: 8px;
+  }
+  .pdf-viewer-header h2 {
+    font-size: 15px;
+    text-align: center;
+    flex: 1;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .pdf-viewer-back, .pdf-viewer-download {
+    padding: 8px 12px;
+    font-size: 11px;
+    border-radius: 10px;
+  }
+  .estimate-html-preview {
+    padding: 20px 10px;
+  }
+  .estimate-card {
+    padding: 30px 16px;
+  }
+  .estimate-card__header {
+    flex-direction: column;
+    gap: 16px;
+  }
+  .estimate-total-section {
+    width: 100%;
+  }
+}
+
+@media (max-width: 480px) {
+  .pdf-viewer-header h2 {
+    display: none;
   }
 }
 
