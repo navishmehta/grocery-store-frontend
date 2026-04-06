@@ -7,11 +7,13 @@ import { Trash2, Pencil } from "lucide-react";
 import { useToast } from "../context/ToastContext";
 import ProductSearchBar from "../components/ProductSearchBar";
 import { filterProducts } from "../utils/filterUtils";
+import LocationPicker from "../components/LocationPicker";
 
 export default function Cart() {
     const [cart, setCart] = useState([]);
     const [search, setSearch] = useState("");
     const [customerName, setCustomerName] = useState("");
+    const [customerAddress, setCustomerAddress] = useState("");
     const navigate = useNavigate();
     const { showToast } = useToast();
 
@@ -19,8 +21,6 @@ export default function Cart() {
         const savedCart = JSON.parse(localStorage.getItem("cart")) || [];
         setCart(savedCart);
     }, []);
-
-    const [pdfUrl, setPdfUrl] = useState(null);
 
     const updateLocalStorage = (updatedCart) => {
         setCart(updatedCart);
@@ -75,10 +75,14 @@ export default function Cart() {
             doc.setFontSize(10);
             doc.setTextColor(0);
             const dateStr = `Date: ${new Date().toLocaleDateString()}`;
-            const preparedByStr = customerName ? `Prepared By: ${customerName}` : "";
+            const preparedByStr = customerName ? `Created By: ${customerName}` : "";
+            const customerAddressStr = customerAddress ? `Customer Address: ${customerAddress}` : "";
             doc.text(dateStr, 196, 22, { align: 'right' });
             if (preparedByStr) {
                 doc.text(preparedByStr, 196, 30, { align: 'right' });
+            }
+            if (customerAddressStr) {
+                doc.text(customerAddressStr, 196, 38, { align: 'right' });
             }
 
             // Separator line
@@ -88,7 +92,7 @@ export default function Cart() {
             // Estimate Title
             doc.setFontSize(16);
             doc.setFont("helvetica", "bold");
-            doc.text("Grocery Estimate", 14, 45);
+            doc.text("Grocery Bill", 14, 45);
 
             const tableRows = cart.map(item => [
                 item.name.en,
@@ -139,8 +143,16 @@ export default function Cart() {
     }
 
     const handleDownload = async () => {
-        if (!customerName.trim()) {
+        if (!customerName.trim() && !customerAddress.trim()) {
+            showToast("Please enter a Customer Name and Address before downloading.", "danger");
+            return;
+        }
+        else if (!customerName.trim()) {
             showToast("Please enter a Customer Name before downloading.", "danger");
+            return;
+        }
+        else if (!customerAddress.trim()) {
+            showToast("Please enter a Customer Address before downloading.", "danger");
             return;
         }
         const doc = await preparePDF();
@@ -150,8 +162,16 @@ export default function Cart() {
     const [showPreview, setShowPreview] = useState(false);
 
     const handleView = async () => {
-        if (!customerName.trim()) {
+        if (!customerName.trim() && !customerAddress.trim()) {
+            showToast("Please enter a Customer Name and Address before viewing the estimate.", "danger");
+            return;
+        }
+        else if (!customerName.trim()) {
             showToast("Please enter a Customer Name before viewing the estimate.", "danger");
+            return;
+        }
+        else if (!customerAddress.trim()) {
+            showToast("Please enter a Customer Address before viewing the estimate.", "danger");
             return;
         }
         setShowPreview(true);
@@ -189,6 +209,7 @@ export default function Cart() {
                         <div className="estimate-meta-row">
                             <div className="prepared-by">
                                 {customerName && <span><strong>Prepared By:</strong> {customerName}</span>}
+                                {customerAddress && <span><strong>Customer Address:</strong> {customerAddress}</span>}
                             </div>
                             <div className="estimate-date">Date: {new Date().toLocaleDateString()}</div>
                         </div>
@@ -329,15 +350,28 @@ export default function Cart() {
 
                                 {/* Customer Info Input */}
                                 <div className="customer-info-box">
-                                    <label>Customer Name / Person Name</label>
-                                    <input
-                                        type="text"
-                                        value={customerName}
-                                        onChange={(e) => setCustomerName(e.target.value)}
-                                        placeholder="Who is this list for?"
-                                        className="customer-input"
-                                    />
+                                    <div className="">
+                                        {/* <label>Customer/Person Name</label> */}
+                                        <input
+                                            type="text"
+                                            value={customerName}
+                                            onChange={(e) => setCustomerName(e.target.value)}
+                                            placeholder="Customer Name"
+                                            className="customer-input"
+                                        />
+                                    </div>
+                                    <div className="address-input-wrapper">
+                                        <input
+                                            type="text"
+                                            value={customerAddress}
+                                            onChange={(e) => setCustomerAddress(e.target.value)}
+                                            placeholder="Customer Address"
+                                            className="customer-input"
+                                        />
+                                        <LocationPicker onAddressFetched={(addr) => setCustomerAddress(addr)} />
+                                    </div>
                                 </div>
+
 
                                 <div className="summary-line">
                                     <span>Subtotal (Actual Price)</span>
@@ -356,10 +390,10 @@ export default function Cart() {
 
                                 <div className="summary-actions">
                                     <button className="btn-view-est" onClick={handleView}>
-                                        👁️ View Estimate
+                                        👁️ Check Your Bill
                                     </button>
                                     <button className="btn-download-est" onClick={handleDownload}>
-                                        📄 Download PDF
+                                        📄 Download Bill PDF
                                     </button>
                                     <p className="summary-disclaimer">
                                         * Prices are estimated and subject to market availability at the store.

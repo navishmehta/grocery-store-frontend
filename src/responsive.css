@@ -101,7 +101,8 @@
 
 .admin-header__btn--logout:hover {
   background-color: white;
-  color: #ef4444; /* Give logout a hint of red on hover for intuitive feedback */
+  color: #ef4444;
+  /* Give logout a hint of red on hover for intuitive feedback */
   border-color: white;
 }
 
@@ -726,7 +727,6 @@
   top: 0;
   z-index: 100;
   gap: 12px;
-  max-width: 90%;
   margin: auto;
 }
 
@@ -898,7 +898,8 @@
   align-items: center;
   margin-top: auto;
   gap: 12px;
-  flex-wrap: wrap; /* Fallback for very small cards */
+  flex-wrap: wrap;
+  /* Fallback for very small cards */
 }
 
 .shop-card__price {
@@ -1238,7 +1239,8 @@
   .admin-header {
     padding: 24px 20px;
     flex-direction: column;
-    align-items: center; /* Center header content on mobile */
+    align-items: center;
+    /* Center header content on mobile */
     text-align: center;
     gap: 20px;
   }
@@ -1251,7 +1253,8 @@
   }
 
   .admin-header__btn {
-    flex: 1; /* Make buttons equal width on mobile */
+    flex: 1;
+    /* Make buttons equal width on mobile */
     padding: 11px 16px;
     font-size: 13px;
   }
@@ -1655,8 +1658,10 @@
   color: white;
   border: none;
   border-radius: 12px;
-  padding: 10px 14px; /* Reduced side padding slightly */
-  font-size: 13px; /* Slightly smaller font to fit better */
+  padding: 10px 14px;
+  /* Reduced side padding slightly */
+  font-size: 13px;
+  /* Slightly smaller font to fit better */
   font-weight: 700;
   cursor: pointer;
   transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
@@ -1666,7 +1671,8 @@
   justify-content: center;
   gap: 6px;
   font-family: inherit;
-  white-space: nowrap; /* Prevent "Add to Cart" from breaking into multiple lines */
+  white-space: nowrap;
+  /* Prevent "Add to Cart" from breaking into multiple lines */
   flex-shrink: 0;
 }
 
@@ -2626,9 +2632,12 @@
 }
 
 .customer-info-box {
-  margin-bottom: 24px;
-  padding-bottom: 16px;
+
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
   border-bottom: 1px solid #f1f5f9;
+  margin-bottom: 10px;
 }
 
 .customer-info-box label {
@@ -2657,6 +2666,51 @@
   border-color: #10b981;
   background: white;
   box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.1);
+}
+
+.address-input-wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.btn-location-picker {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  background: white;
+  color: #10b981;
+  border: 1px solid #10b981;
+  padding: 8px 12px;
+  border-radius: 10px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+  font-family: inherit;
+  width: fit-content;
+}
+
+.btn-location-picker:hover:not(:disabled) {
+  background: #f0fdf4;
+  transform: translateY(-1px);
+}
+
+.btn-location-picker:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  border-color: #cbd5e1;
+  color: #64748b;
+}
+
+.btn-location-picker .spinner {
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
 }
 
 

@@ -58,8 +58,8 @@ export default function EditProduct() {
     }, [id]);
 
     const handleUpdate = async () => {
-        // Validation logic would go here
-        startLoading();
+        // Validation logic
+        startLoading(); // Show global loader
         try {
             const formData = new FormData();
 
@@ -78,11 +78,13 @@ export default function EditProduct() {
                 headers: { "Content-Type": "multipart/form-data" },
             });
 
-            stopLoading();
+            console.log("Product updated successfully");
             navigate("/admin/products");
         } catch (error) {
-            alert("Error updating product");
-            stopLoading();
+            console.error("Update error:", error);
+            alert(error.response?.data?.message || "An error occurred while updating the product");
+        } finally {
+            stopLoading(); // ALWAYS stop the loader
         }
     };
 

@@ -161,12 +161,16 @@ export default function Products() {
 
     const confirmDelete = async () => {
         if (!pendingDelete) return;
+        startLoading(); // Show global loader during deletion
         try {
             await API.delete(`/products/${pendingDelete._id}`);
             setPendingDelete(null);
-            fetchProducts();
+            await fetchProducts();
         } catch (err) {
-            console.error(err);
+            console.error("Delete failure:", err);
+            alert("Failed to delete product. Please try again.");
+        } finally {
+            stopLoading();
         }
     };
 

@@ -55,7 +55,8 @@ export default function AddProduct() {
 
     const handleSubmit = async () => {
         if (!validate()) return;
-        startLoading();
+        
+        startLoading(); // Activate global loader
         try {
             const formData = new FormData();
 
@@ -78,12 +79,12 @@ export default function AddProduct() {
             });
 
             console.log("Product added successfully", res);
-
-            stopLoading();
             navigate("/admin/products");
         } catch (error) {
-            alert(error.response?.data?.message || "An error occurred");
-            stopLoading();
+            console.error("Error adding product:", error);
+            alert(error.response?.data?.message || "An error occurred while adding the product");
+        } finally {
+            stopLoading(); // Ensure loader is ALWAYS stopped
         }
     };
 
